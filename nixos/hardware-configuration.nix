@@ -14,45 +14,44 @@
   boot.extraModulePackages = [ ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/131eb831-a691-40a4-a739-238ea4f0489f";
+    { device = "/dev/disk/by-uuid/ca5d1caf-eeb1-44cc-9504-73cb96b766d8";
       fsType = "btrfs";
       options = [ "subvol=root" "compress=zstd" "noatime" ];
     };
 
-  boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/9e382640-b28b-484e-96fe-0dfc7ef5255d";
+  boot.initrd.luks.devices."enc".device = "/dev/disk/by-uuid/1d0a7181-a9eb-462a-9ad0-d6681d9aa8b8";
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/131eb831-a691-40a4-a739-238ea4f0489f";
+    { device = "/dev/disk/by-uuid/ca5d1caf-eeb1-44cc-9504-73cb96b766d8";
       fsType = "btrfs";
       options = [ "subvol=home" "compress=zstd" "noatime" ];
     };
 
   fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/131eb831-a691-40a4-a739-238ea4f0489f";
+    { device = "/dev/disk/by-uuid/ca5d1caf-eeb1-44cc-9504-73cb96b766d8";
       fsType = "btrfs";
       options = [ "subvol=nix" "compress=zstd" "noatime" ];
     };
 
   fileSystems."/persist" =
-    { device = "/dev/disk/by-uuid/131eb831-a691-40a4-a739-238ea4f0489f";
+    { device = "/dev/disk/by-uuid/ca5d1caf-eeb1-44cc-9504-73cb96b766d8";
       fsType = "btrfs";
       options = [ "subvol=persist" "compress=zstd" "noatime" ];
     };
 
   fileSystems."/var/log" =
-    { device = "/dev/disk/by-uuid/131eb831-a691-40a4-a739-238ea4f0489f";
+    { device = "/dev/disk/by-uuid/ca5d1caf-eeb1-44cc-9504-73cb96b766d8";
       fsType = "btrfs";
       options = [ "subvol=log" "compress=zstd" "noatime" ];
-      neededForBoot = true;
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/8892-289F";
+    { device = "/dev/disk/by-uuid/56F5-A327";
       fsType = "vfat";
     };
 
   swapDevices =
-    [ { device = "/dev/disk/by-uuid/cc59a34e-f9d7-4646-a14a-e4664adee460"; }
+    [ { device = "/dev/disk/by-uuid/7425b340-4b51-49ed-98c8-5c9e7787dbe7"; }
     ];
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
