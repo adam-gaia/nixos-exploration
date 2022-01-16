@@ -4,6 +4,7 @@
 
 { config, pkgs, ... }:
 
+
 {
   imports =
     [ # Include the results of the hardware scan.
@@ -129,7 +130,22 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  users = {
+    mutableUsers = false;
+    users = {
+      agaia = {
+        isNormalUser = true;
+        group = "agaia";
+        extraGroups = [ "wheel" ]; # Wheel group grants sudoer
+        password = "test";
+      };
+      root = {
+        password = "test";
+      };
+    };
+  };
   users.users.agaia = {
+    group = "agaia";
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
