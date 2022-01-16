@@ -130,25 +130,17 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users = {
-    mutableUsers = false;
-    users = {
-      agaia = {
-        isNormalUser = true;
-        group = "agaia";
-        extraGroups = [ "wheel" ]; # Wheel group grants sudoer
-        password = "test";
-      };
-      root = {
-        password = "test";
-      };
-    };
-  };
   users.users.agaia = {
-    group = "agaia";
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    uid = 1000;
+    description = "Adam Gaia";
+    extraGroups = [ "wheel" ]; # Wheel group grants sudoer
+    password = "test";
   };
+  users.users.root = {
+    password = "test";
+  };
+  users.mutableUsers = false;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -159,6 +151,8 @@
     curl
     wget
     firefox
+    zsh
+    tmux
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
