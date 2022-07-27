@@ -4,13 +4,10 @@
 
 { config, pkgs, ... }:
 
-
 {
-  imports =
-    [ # Include the results of the hardware scan.
+  imports = [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
-
 
   environment.etc = {
     nixos.source = "/persist/etc/nixos";
@@ -23,11 +20,44 @@
     "L /var/lib/NetworkManager/secret_key - - - - /persist/var/lib/NetworkManager/secret_key"
     "L /var/lib/NetworkManager/seen-bssids - - - - /persist/var/lib/NetworkManager/seen-bssids"
     "L /var/lib/NetworkManager/timestamps - - - - /persist/var/lib/NetworkManager/timestamps"
+    "L /var/lib/docker - - - - /persist/var/lib/docker"
   ];
   security.sudo.extraConfig = ''
     # rollback results in sudo lectures after each reboot
     Defaults lecture = never
   '';
+
+
+  # Enable flakes
+  nix.package = pkgs.nixFlakes;
+  nix.extraOptions = ''
+    experimental-features = nix-command flakes
+  '';
+
+
+
+
+  # Hardware support for Wayland & Sway
+  hardware = {
+    opengl = {
+      enable = true;
+      driSupport = true;
+    };
+  };
+
+  services.xserver.videoDrivers = [ "nvidia" ];
+  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
+
+  # XDG standard - improces communication between bundled flatpak apps and Wayland
+  xdg = {
+    portal = {
+      enable = true;
+      extraPortals = with pkgs; [
+        xdg-desktop-portal-wlr
+        #xdg-desktop-portal-gtk # I think this is already set with sway or gnome
+      ];
+    };
+  };
 
 
   # Note `lib.mkBefore` is used instead of `lib.mkAfter` here.
@@ -71,13 +101,26 @@
   '';
 
 
+  virtualisation.docker = {
+    enable = true;
+  };
+
+  virtualisation.podman = {
+    enable = true;
+  };
+  
+  services.flatpak.enable = true;
+  services.opensnitch.enable = true;
+
+  # Allow thunderbolt dockes  
+  services.hardware.bolt.enable = true;
 
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.supportedFilesystems = [ "btrfs" ];
   hardware.enableAllFirmware = true;
   nixpkgs.config.allowUnfree = true;
-
+  
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -122,9 +165,25 @@
   # Enable CUPS to print documents.
   # services.printing.enable = true;
 
-  # Enable sound.
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
+  # Enable sound via pipewire.
+  # The wiki notes that enabling sound may conflict with pipewire setup
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+  hardware.pulseaudio.enable = false;
+  hardware.bluetooth.enable = true;
+
+  hardware.bluetooth.settings = {
+    General = {
+      ControllerMode = "bredr";
+      Enable = "Source,Sink,Media,Socket";
+    };
+  };
+
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
@@ -134,25 +193,29 @@
     isNormalUser = true;
     uid = 1000;
     description = "Adam Gaia";
-    extraGroups = [ "wheel" ]; # Wheel group grants sudoer
+    extraGroups = [ "wheel" "docker" ]; # Wheel group grants sudoer
     password = "test";
   };
   users.users.root = {
     password = "test";
   };
-  users.mutableUsers = false;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    bash
+    vim
     git
+    gnumake
+    nixops
+    tmux
+    htop
+    less
+    neovim
     nano
     curl
     wget
-    firefox
-    zsh
-    tmux
+    parted
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -166,7 +229,12 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh = {
+    enable = true;
+    permitRootLogin = "prohibit-password";
+    passwordAuthentication = false;
+    challengeResponseAuthentication = false;
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -181,6 +249,7 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "21.11"; # Did you read the comment?
-
+  
+  
 }
 
